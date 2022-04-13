@@ -339,7 +339,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             tempList = mMediaManager.getInternalStorageFileListSnapshot();
                         }
                         if (tempList != null) {
-                            mediaFileList.addAll(tempList);
+                            for(MediaFile file : tempList) {
+                                if(file.getMediaType() == MediaFile.MediaType.MOV || file.getMediaType() == MediaFile.MediaType.MP4) {
+                                    tempList.remove(file);
+                                }
+                                else {
+                                    mediaFileList.add(file);
+                                }
+                            }
                         }
                         if (mediaFileList != null) {
                             Collections.sort(mediaFileList, (lhs, rhs) -> {
