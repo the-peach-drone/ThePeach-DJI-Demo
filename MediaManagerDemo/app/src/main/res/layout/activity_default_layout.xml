@@ -188,8 +188,8 @@
 
     <Button
         android:id="@+id/btn_mediaManager"
-        android:layout_width="38dp"
-        android:layout_height="30dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignStart="@+id/CameraCapturePanel"
         android:layout_below="@id/CameraCapturePanel"
         android:background="@drawable/playback"
