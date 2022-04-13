@@ -43,64 +43,28 @@
         android:textSize="11sp" />
 
     <Button
-        android:id="@+id/status_btn"
+        android:id="@+id/upload_btn"
         android:layout_width="75dp"
         android:layout_height="40dp"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/download_btn"
-        android:text="Status"
+        android:text="Upload"
         android:textSize="11sp" />
 
     <Button
-        android:id="@+id/play_btn"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/back_btn"
-        android:text="Play"
-        android:textSize="11sp" />
-
-    <Button
-        android:id="@+id/resume_btn"
-        android:layout_width="80dp"
-        android:layout_height="40dp"
-        android:layout_below="@+id/back_btn"
-        android:layout_toEndOf="@+id/play_btn"
-        android:text="Resume"
-        android:textSize="11sp" />
-
-    <Button
-        android:id="@+id/pause_btn"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:layout_below="@+id/reload_btn"
-        android:layout_toEndOf="@+id/resume_btn"
-        android:text="Pause"
-        android:textSize="11sp" />
-
-    <Button
-        android:id="@+id/stop_btn"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:layout_below="@+id/reload_btn"
-        android:layout_toEndOf="@+id/pause_btn"
-        android:text="Stop"
-        android:textSize="11sp" />
-
-    <Button
-        android:id="@+id/moveTo_btn"
+        android:id="@+id/setting_btn"
         android:layout_width="75dp"
         android:layout_height="40dp"
-        android:layout_below="@+id/reload_btn"
-        android:layout_toEndOf="@+id/stop_btn"
-        android:text="MoveTo"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/upload_btn"
+        android:text="Setting"
         android:textSize="11sp" />
 
     <!-- Widget to see first person view (FPV) -->
     <dji.ux.widget.FPVWidget
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/play_btn"
+        android:layout_below="@+id/back_btn"
         android:layout_toStartOf="@+id/pointing_drawer_sd"
         android:id="@+id/FPVWidget" />
 
@@ -108,7 +72,7 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/play_btn"
+        android:layout_below="@+id/back_btn"
         android:layout_marginTop="0dp"
         android:layout_toStartOf="@+id/pointing_drawer_sd"
         android:background="@color/black_overlay"

@@ -50,8 +50,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
-    private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mStatusBtn;
-    private Button mPlayBtn, mResumeBtn, mPauseBtn, mStopBtn, mMoveToBtn;
+    private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mUploadBtn, mSettingBtn;
     private RecyclerView listView;
     private FileListAdapter mListAdapter;
     private List<MediaFile> mediaFileList = new ArrayList<MediaFile>();
@@ -189,28 +188,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBackBtn = (Button) findViewById(R.id.back_btn);
         mDeleteBtn = (Button) findViewById(R.id.delete_btn);
         mDownloadBtn = (Button) findViewById(R.id.download_btn);
+        mUploadBtn = (Button) findViewById(R.id.upload_btn);
+        mSettingBtn = (Button) findViewById(R.id.setting_btn);
         mReloadBtn = (Button) findViewById(R.id.reload_btn);
-        mStatusBtn = (Button) findViewById(R.id.status_btn);
-        mPlayBtn = (Button) findViewById(R.id.play_btn);
-        mResumeBtn = (Button) findViewById(R.id.resume_btn);
-        mPauseBtn = (Button) findViewById(R.id.pause_btn);
-        mStopBtn = (Button) findViewById(R.id.stop_btn);
-        mMoveToBtn = (Button) findViewById(R.id.moveTo_btn);
         mDisplayImageView = (ImageView) findViewById(R.id.imageView);
         mDisplayImageView.setVisibility(View.VISIBLE);
 
         mBackBtn.setOnClickListener(this);
         mDeleteBtn.setOnClickListener(this);
         mDownloadBtn.setOnClickListener(this);
+        mSettingBtn.setOnClickListener(this);
+        mUploadBtn.setOnClickListener(this);
         mReloadBtn.setOnClickListener(this);
         mDownloadBtn.setOnClickListener(this);
-        mStatusBtn.setOnClickListener(this);
-        mPlayBtn.setOnClickListener(this);
-        mResumeBtn.setOnClickListener(this);
-        mPauseBtn.setOnClickListener(this);
-        mStopBtn.setOnClickListener(this);
-        mMoveToBtn.setOnClickListener(this);
-
     }
 
     private void showProgressDialog() {
@@ -716,50 +706,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 downloadFileByIndex(lastClickViewIndex);
                 break;
             }
-            case R.id.status_btn: {
-                if (mPushDrawerSd.isOpened()) {
-                    mPushDrawerSd.animateClose();
-                } else {
-                    mPushDrawerSd.animateOpen();
-                }
+            case R.id.upload_btn: {
+                //TODO : Add upload code
+                setResultToToast("Upload Button Clicked!");
                 break;
             }
-            case R.id.play_btn: {
-                playVideo();
-                break;
-            }
-            case R.id.resume_btn: {
-                mMediaManager.resume(error -> {
-                    if (null != error) {
-                        setResultToToast("Resume Video Failed" + error.getDescription());
-                    } else {
-                        DJILog.e(TAG, "Resume Video Success");
-                    }
-                });
-                break;
-            }
-            case R.id.pause_btn: {
-                mMediaManager.pause(error -> {
-                    if (null != error) {
-                        setResultToToast("Pause Video Failed" + error.getDescription());
-                    } else {
-                        DJILog.e(TAG, "Pause Video Success");
-                    }
-                });
-                break;
-            }
-            case R.id.stop_btn: {
-                mMediaManager.stop(error -> {
-                    if (null != error) {
-                        setResultToToast("Stop Video Failed" + error.getDescription());
-                    } else {
-                        DJILog.e(TAG, "Stop Video Success");
-                    }
-                });
-                break;
-            }
-            case R.id.moveTo_btn: {
-                moveToPosition();
+            case R.id.setting_btn: {
+                //TODO : Add Setting code
+                setResultToToast("Setting Button Clicked!");
                 break;
             }
             default:
