@@ -21,6 +21,7 @@ public class DefaultLayoutActivity extends AppCompatActivity implements View.OnC
         setContentView(R.layout.activity_default_layout);
         mMediaManagerBtn = (Button)findViewById(R.id.btn_mediaManager);
         fpvWidget = findViewById(R.id.fpv_widget);
+        fpvWidget.setSourceCameraNameVisibility(false);
         mMediaManagerBtn.setOnClickListener(this);
     }
 
