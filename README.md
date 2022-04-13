@@ -11,14 +11,9 @@ DJI SDK를 이용하여 촬영한 이미지를 특정 서버로 업로드 하는
  - DJI Android SDK 4.16.1
  - DJI Android UXSDK 4.16
 
-## Supported DJI Products
+## 대상 드론
 
- - Mavic 2 Series
- - Mavic Air
- - Mavic Pro
- - Spark
  - Phantom 4 Pro
  - Phantom 4 Advanced
- - Inspire 2
 
 Original App Code : https://github.com/DJI-Mobile-SDK-Tutorials/Android-MediaManagerDemo
