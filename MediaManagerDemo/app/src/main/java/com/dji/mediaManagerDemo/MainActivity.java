@@ -60,7 +60,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ProgressDialog mLoadingDialog;
     private ProgressDialog mDownloadDialog;
     private SlidingDrawer mPushDrawerSd;
-    File destDir = new File(Environment.getExternalStorageDirectory().getPath() + "/MediaManagerDemo/");
+    private File destDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString());
     private int currentProgress = -1;
     private ImageView mDisplayImageView;
     private int lastClickViewIndex =-1;
@@ -339,12 +339,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             tempList = mMediaManager.getInternalStorageFileListSnapshot();
                         }
                         if (tempList != null) {
-                            for(MediaFile file : tempList) {
-                                if(file.getMediaType() == MediaFile.MediaType.MOV || file.getMediaType() == MediaFile.MediaType.MP4) {
-                                    tempList.remove(file);
+                            for(int i = 0; i < tempList.size(); i++) {
+                                if(tempList.get(i).getMediaType() == MediaFile.MediaType.MOV || tempList.get(i).getMediaType() == MediaFile.MediaType.MP4) {
+                                    tempList.remove(i);
                                 }
                                 else {
-                                    mediaFileList.add(file);
+                                    mediaFileList.add(tempList.get(i));
                                 }
                             }
                         }
