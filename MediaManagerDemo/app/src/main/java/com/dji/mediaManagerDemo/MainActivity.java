@@ -71,6 +71,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private String settingIP;
     private String settingPort;
+    private String settingUser;
+    private String settingPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +102,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         settingIP = new String("NULL");
         settingPort = new String("NULL");
+        settingUser = new String("NULL");
+        settingPass = new String("NULL");
     }
 
     @Override
@@ -741,8 +745,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if(resultCode == RESULT_OK) {
             settingIP = data.getStringExtra("ip");
             settingPort = data.getStringExtra("port");
+            settingUser = data.getStringExtra("user");
+            settingPass = data.getStringExtra("pass");
 
+            //Debug
             setResultToToast("Setting to IP : " + settingIP + " Port : " + settingPort);
+
+            //FTP Connect
         }
         else {
             setResultToToast("Server Setting Failed!");
