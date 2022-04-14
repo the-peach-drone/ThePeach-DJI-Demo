@@ -44,7 +44,7 @@
 
         <meta-data
             android:name="com.dji.sdk.API_KEY"
-            android:value="Please enter your App Key here." />
+            android:value="API KEY HERE." />
 
         <!-- DJI SDK -->
         <activity
@@ -69,6 +69,10 @@
             android:name=".DefaultLayoutActivity"
             android:configChanges="orientation"
             android:screenOrientation="landscape" />
+
+        <activity android:name=".popup_Settings"
+            android:theme="@android:style/Animation.Dialog" />
+
         <activity
             android:name=".MainActivity"
             android:screenOrientation="landscape" />

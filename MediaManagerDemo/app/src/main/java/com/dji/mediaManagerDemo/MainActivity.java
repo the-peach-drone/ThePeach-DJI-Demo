@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -68,6 +69,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView mPushTv;
     private SettingsDefinitions.StorageLocation storageLocation;
 
+    private String settingIP;
+    private String settingPort;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +97,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             }
         });
+
+        settingIP = new String("NULL");
+        settingPort = new String("NULL");
     }
 
     @Override
@@ -719,12 +726,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.setting_btn: {
-                //TODO : Add Setting code
-                setResultToToast("Setting Button Clicked!");
+                Intent settingDataIntent = new Intent(this, popup_Settings.class);
+                startActivityForResult(settingDataIntent, 1);
                 break;
             }
             default:
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK) {
+            settingIP = data.getStringExtra("ip");
+            settingPort = data.getStringExtra("port");
+
+            setResultToToast("Setting to IP : " + settingIP + " Port : " + settingPort);
+        }
+        else {
+            setResultToToast("Server Setting Failed!");
         }
     }
 
