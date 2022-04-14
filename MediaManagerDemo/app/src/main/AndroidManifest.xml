@@ -71,7 +71,7 @@
             android:screenOrientation="landscape" />
 
         <activity android:name=".popup_Settings"
-            android:theme="@android:style/Animation.Dialog" />
+            android:theme="@android:style/Theme.Dialog" />
 
         <activity
             android:name=".MainActivity"

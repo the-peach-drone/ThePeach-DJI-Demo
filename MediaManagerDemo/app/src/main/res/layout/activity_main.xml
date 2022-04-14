@@ -60,13 +60,6 @@
         android:text="Setting"
         android:textSize="11sp" />
 
-    <!-- Widget to see first person view (FPV) -->
-    <dji.ux.widget.FPVWidget
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/back_btn"
-        android:layout_toStartOf="@+id/pointing_drawer_sd"
-        android:id="@+id/FPVWidget" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -83,7 +76,7 @@
         android:layout_width="250dp"
         android:layout_height="match_parent"
         android:layout_marginLeft="0dp"
-        android:layout_toEndOf="@+id/FPVWidget" />
+        android:layout_toEndOf="@+id/imageView" />
 
     <SlidingDrawer
         android:id="@+id/pointing_drawer_sd"
