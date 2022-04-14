@@ -17,7 +17,7 @@
 
     <dji.ux.widget.FPVOverlayWidget
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <!-- Widgets in top status bar -->
     <LinearLayout
@@ -132,7 +132,7 @@
             android:id="@+id/Compass"
             android:layout_width="405dp"
             android:layout_height="91dp"
-            android:layout_marginRight="12dp"/>
+            android:layout_marginRight="12dp" />
 
     </LinearLayout>
 
@@ -147,12 +147,20 @@
         <dji.ux.widget.TakeOffWidget
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
         <dji.ux.widget.ReturnHomeWidget
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/btn_mediaManager"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/round_btn_normal" />
+
     </LinearLayout>
 
 
@@ -161,7 +169,8 @@
         android:layout_width="50dp"
         android:layout_height="213dp"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/camera" />
+        android:layout_below="@id/camera"
+        />
 
 
     <dji.ux.panel.CameraSettingExposurePanel
@@ -185,15 +194,6 @@
         android:background="@color/transparent"
         android:gravity="center"
         android:visibility="invisible" />
-
-    <Button
-        android:id="@+id/btn_mediaManager"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignStart="@+id/CameraCapturePanel"
-        android:layout_below="@id/CameraCapturePanel"
-        android:background="@drawable/playback"
-        android:visibility="visible" />
 
     <!-- Pre-flight checklist panel -->
     <dji.ux.panel.PreFlightCheckListPanel
