@@ -1,7 +1,6 @@
 package com.dji.mediaManagerDemo;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,26 +11,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SlidingDrawer;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import dji.common.airlink.PhysicalSource;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.camera.StorageState;
 import dji.common.error.DJICameraError;
@@ -467,7 +463,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
                 mItemHolder.file_name.setText(mediaFile.getFileName());
                 mItemHolder.file_type.setText(mediaFile.getMediaType().name());
-                mItemHolder.file_size.setText(mediaFile.getFileSize() + " Bytes");
+                mItemHolder.file_size.setText(FileUtils.byteCountToDisplaySize(mediaFile.getFileSize()));
                 mItemHolder.thumbnail_img.setImageBitmap(mediaFile.getThumbnail());
                 mItemHolder.thumbnail_img.setOnClickListener(ImgOnClickListener);
                 mItemHolder.thumbnail_img.setTag(mediaFile);
@@ -479,7 +475,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     mItemHolder.itemView.setSelected(false);
                 }
                 mItemHolder.itemView.setOnClickListener(itemViewOnClickListener);
-
             }
         }
     }
@@ -664,47 +659,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    private void playVideo() {
-        mDisplayImageView.setVisibility(View.INVISIBLE);
-        MediaFile selectedMediaFile = mediaFileList.get(lastClickViewIndex);
-        if ((selectedMediaFile.getMediaType() == MediaFile.MediaType.MOV) || (selectedMediaFile.getMediaType() == MediaFile.MediaType.MP4)) {
-            mMediaManager.playVideoMediaFile(selectedMediaFile, error -> {
-                if (null != error) {
-                    setResultToToast("Play Video Failed " + error.getDescription());
-                } else {
-                    DJILog.e(TAG, "Play Video Success");
-                }
-            });
-        }
-    }
-
-    private void moveToPosition(){
-
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.prompt_input_position, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setView(promptsView);
-        final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
-        alertDialogBuilder.setCancelable(false).setPositiveButton("OK", (dialog, id) -> {
-            String ms = userInput.getText().toString();
-            mMediaManager.moveToPosition(Integer.parseInt(ms),
-                    new CommonCallbacks.CompletionCallback() {
-                        @Override
-                        public void onResult(DJIError error) {
-                            if (null != error) {
-                                setResultToToast("Move to video position failed" + error.getDescription());
-                            } else {
-                                DJILog.e(TAG, "Move to video position successfully.");
-                            }
-                        }
-                    });
-        })
-                .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -713,7 +667,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.delete_btn:{
-                deleteFileByIndex(lastClickViewIndex);
+                if(lastClickViewIndex < 0) {
+                    setResultToToast("First select image before delete.");
+                }
+                else {
+                    deleteFileByIndex(lastClickViewIndex);
+                }
                 break;
             }
             case R.id.reload_btn: {
@@ -721,7 +680,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.download_btn: {
-                downloadFileByIndex(lastClickViewIndex);
+                if(lastClickViewIndex < 0) {
+                    setResultToToast("First select image before download.");
+                }
+                else {
+                    downloadFileByIndex(lastClickViewIndex);
+                }
                 break;
             }
             case R.id.upload_btn: {
