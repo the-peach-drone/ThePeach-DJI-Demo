@@ -17,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,10 +68,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView mPushTv;
     private SettingsDefinitions.StorageLocation storageLocation;
 
+    // FTP variable
     private String settingIP;
     private String settingPort;
     private String settingUser;
     private String settingPass;
+    private final String FTP_TAG = "Connect FTP";
+    public FTPClient mFTPClient = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,10 +102,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         });
 
+        // FTP init
         settingIP = new String("NULL");
         settingPort = new String("NULL");
         settingUser = new String("NULL");
         settingPass = new String("NULL");
+        mFTPClient = new FTPClient();
     }
 
     @Override
@@ -593,7 +601,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             public void onFailure(DJIError error) {
                 HideDownloadProgressDialog();
                 setResultToToast("Download File Failed" + error.getDescription());
-                currentProgress = -1;
+                currentProgress = -3;
             }
 
             @Override
@@ -627,6 +635,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 currentProgress = -1;
             }
         });
+    }
+
+    private void uploadFileToFTP(final int index) {
+        setResultToToast("Download file before upload.");
+        downloadFileByIndex(lastClickViewIndex);
+
+        if(currentProgress != -3) {
+            //FTP Connect
+            boolean ftp_status = false;
+            ftp_status = ftpConnect(settingIP, settingUser, settingPass, Integer.parseInt(settingPort));
+
+            if(ftp_status == true) {
+                //TODO : Replace with upload code using FTP.
+                ftpDisconnect();
+            }
+            else {
+                setResultToToast("Couldn't find host.");
+            }
+        }
+        else {
+            setResultToToast("Download Failed. Abort Upload");
+        }
     }
 
     private void deleteFileByIndex(final int index) {
@@ -689,8 +719,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.upload_btn: {
-                //TODO : Add upload code
-                setResultToToast("Upload Button Clicked!");
+                if(lastClickViewIndex < 0) {
+                    setResultToToast("First select image before upload.");
+                }
+                else {
+                    uploadFileToFTP(lastClickViewIndex);
+                }
                 break;
             }
             case R.id.setting_btn: {
@@ -714,8 +748,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             //Debug
             setResultToToast("Setting to IP : " + settingIP + " Port : " + settingPort);
-
-            //FTP Connect
         }
         else {
             setResultToToast("Server Setting Failed!");
@@ -744,5 +776,70 @@ public class MainActivity extends Activity implements View.OnClickListener {
             return baseProduct.getModel() == Model.MATRICE_300_RTK;
         }
         return false;
+    }
+
+    // FTP Connect
+    public boolean ftpConnect(String host, String username, String password, int port) {
+        boolean result = false;
+        try{
+            mFTPClient.connect(host, port);
+
+            if(FTPReply.isPositiveCompletion(mFTPClient.getReplyCode())) {
+                result = mFTPClient.login(username, password);
+                mFTPClient.enterLocalPassiveMode();
+            }
+        }catch (Exception e){
+            DJILog.e(FTP_TAG, "Couldn't connect to host");
+        }
+        return result;
+    }
+
+    // FTP Disconnect
+    public boolean ftpDisconnect() {
+        boolean result = false;
+        try {
+            mFTPClient.logout();
+            mFTPClient.disconnect();
+            result = true;
+        } catch (Exception e) {
+            DJILog.e(FTP_TAG, "Failed to disconnect with server");
+        }
+        return result;
+    }
+
+    // FTP Add Directory
+    public boolean ftpCreateDirectory(String directory) {
+        boolean result = false;
+        try {
+            result =  mFTPClient.makeDirectory(directory);
+        } catch (Exception e){
+            DJILog.e(FTP_TAG, "Couldn't make the directory");
+        }
+        return result;
+    }
+
+    public boolean ftpChangeDirctory(String directory) {
+        try{
+            mFTPClient.changeWorkingDirectory(directory);
+            return true;
+        }catch (Exception e){
+            DJILog.e(FTP_TAG, "Couldn't change the directory");
+        }
+        return false;
+    }
+
+    // FTP File Upload
+    public boolean ftpUploadFile(String srcFilePath, String desFileName, String desDirectory) {
+        boolean result = false;
+        try {
+            FileInputStream fis = new FileInputStream(srcFilePath);
+            if(ftpChangeDirctory(desDirectory)) {
+                result = mFTPClient.storeFile(desFileName, fis);
+            }
+            fis.close();
+        } catch(Exception e){
+            DJILog.e(FTP_TAG, "Couldn't upload the file");
+        }
+        return result;
     }
 }
