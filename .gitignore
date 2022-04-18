@@ -71,4 +71,4 @@ Thumbs.db
 import-summary.txt
 
 # Keys
-app/src/main/res/values/keys.xml
+MediaManagerDemo/app/src/main/res/values/keys.xml
