@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -70,10 +71,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private SettingsDefinitions.StorageLocation storageLocation;
 
     // FTP variable
-    private String settingIP;
-    private String settingPort;
-    private String settingUser;
-    private String settingPass;
     private final String FTP_TAG = "Connect FTP";
     public FTPClient mFTPClient = null;
 
@@ -104,10 +101,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         });
 
         // FTP init
-        settingIP = new String("NULL");
-        settingPort = new String("NULL");
-        settingUser = new String("NULL");
-        settingPass = new String("NULL");
         mFTPClient = new FTPClient();
     }
 
@@ -687,7 +680,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 setResultToToast("Download File Success" + ":" + filePath);
                 currentProgress = -1;
 
-                //FTP Upload
+                // Get FTP ENV
+                SharedPreferences ftpEnv = getSharedPreferences("FTP_ENV", MODE_PRIVATE);
+                String settingIP = ftpEnv.getString("ftpHost", "");
+                String settingPort = ftpEnv.getString("ftpPort", "");
+                String settingUser = ftpEnv.getString("ftpUser", "");
+                String settingPass = ftpEnv.getString("ftpPass", "");
+
+                // FTP Upload
                 Thread ftp_Thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -704,13 +704,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             else {
                                 setResultToToast("File upload fail.");
                             }
-                            // delete internal file
-                            destDir_internal.delete();
                             ftpDisconnect();
                         }
                         else {
                             setResultToToast("Can't find host.");
                         }
+                        // Delete internal file
+                        destDir_internal.delete();
                     }
                 });
                 ftp_Thread.start();
@@ -730,11 +730,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         public void run() {
                             MediaFile file = mediaFileList.remove(index);
 
-                            //Reset select view
+                            // Reset select view
                             lastClickViewIndex = -1;
                             lastClickView = null;
 
-                            //Update recyclerView
+                            // Update recyclerView
                             mListAdapter.notifyItemRemoved(index);
                         }
                     });
@@ -793,23 +793,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             default:
                 break;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK) {
-            settingIP = data.getStringExtra("ip");
-            settingPort = data.getStringExtra("port");
-            settingUser = data.getStringExtra("user");
-            settingPass = data.getStringExtra("pass");
-
-            //Debug
-            setResultToToast("Setting to IP : " + settingIP + " Port : " + settingPort);
-        }
-        else {
-            setResultToToast("Server Setting Failed!");
         }
     }
 
