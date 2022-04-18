@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.jetbrains.annotations.NotNull;
@@ -601,7 +602,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             public void onFailure(DJIError error) {
                 HideDownloadProgressDialog();
                 setResultToToast("Download File Failed" + error.getDescription());
-                currentProgress = -3;
+                currentProgress = -1;
             }
 
             @Override
@@ -639,24 +640,82 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void uploadFileToFTP(final int index) {
         setResultToToast("Download file before upload.");
-        downloadFileByIndex(lastClickViewIndex);
 
-        if(currentProgress != -3) {
-            //FTP Connect
-            boolean ftp_status = false;
-            ftp_status = ftpConnect(settingIP, settingUser, settingPass, Integer.parseInt(settingPort));
+        if ((mediaFileList.get(index).getMediaType() == MediaFile.MediaType.PANORAMA)
+                || (mediaFileList.get(index).getMediaType() == MediaFile.MediaType.SHALLOW_FOCUS)) {
+            return;
+        }
 
-            if(ftp_status == true) {
-                //TODO : Replace with upload code using FTP.
-                ftpDisconnect();
+        // use internal avoid permission problem
+        File destDir_internal = new File(getFilesDir(), mediaFileList.get(index).getFileName());
+
+        mediaFileList.get(index).fetchFileData(destDir_internal, null, new DownloadListener<String>() {
+            @Override
+            public void onFailure(DJIError error) {
+                HideDownloadProgressDialog();
+                setResultToToast("Download File Failed" + error.getDescription());
+                currentProgress = -1;
             }
-            else {
-                setResultToToast("Couldn't find host.");
+
+            @Override
+            public void onProgress(long total, long current) {
             }
-        }
-        else {
-            setResultToToast("Download Failed. Abort Upload");
-        }
+
+            @Override
+            public void onRateUpdate(long total, long current, long persize) {
+                int tmpProgress = (int) (1.0 * current / total * 100);
+                if (tmpProgress != currentProgress) {
+                    mDownloadDialog.setProgress(tmpProgress);
+                    currentProgress = tmpProgress;
+                }
+            }
+
+            @Override
+            public void onRealtimeDataUpdate(byte[] bytes, long l, boolean b) {
+
+            }
+
+            @Override
+            public void onStart() {
+                currentProgress = -1;
+                ShowDownloadProgressDialog();
+            }
+
+            @Override
+            public void onSuccess(String filePath) {
+                HideDownloadProgressDialog();
+                setResultToToast("Download File Success" + ":" + filePath);
+                currentProgress = -1;
+
+                //FTP Upload
+                Thread ftp_Thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean ftp_Status = ftpConnect(settingIP, settingUser, settingPass, Integer.valueOf(settingPort));
+                        if(ftp_Status == true) {
+                            String srcFilePath = destDir_internal.getPath() + "/" + mediaFileList.get(index).getFileName();
+                            String desFileName = mediaFileList.get(index).getFileName();
+                            String desDirectory = ftpGetDirectory();
+
+                            boolean ftp_File = ftpUploadFile(srcFilePath, desFileName, desDirectory);
+                            if(ftp_File == true) {
+                                setResultToToast("File upload.");
+                            }
+                            else {
+                                setResultToToast("File upload fail.");
+                            }
+                            // delete internal file
+                            destDir_internal.delete();
+                            ftpDisconnect();
+                        }
+                        else {
+                            setResultToToast("Can't find host.");
+                        }
+                    }
+                });
+                ftp_Thread.start();
+            }
+        });
     }
 
     private void deleteFileByIndex(final int index) {
@@ -834,12 +893,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
         try {
             FileInputStream fis = new FileInputStream(srcFilePath);
             if(ftpChangeDirctory(desDirectory)) {
+                mFTPClient.setFileType(FTP.BINARY_FILE_TYPE);
+                mFTPClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
                 result = mFTPClient.storeFile(desFileName, fis);
             }
             fis.close();
         } catch(Exception e){
+            setResultToToast(e.toString());
             DJILog.e(FTP_TAG, "Couldn't upload the file");
         }
         return result;
+    }
+
+    // FTP Get current directory
+    public String ftpGetDirectory(){
+        String directory = null;
+        try{
+            directory = mFTPClient.printWorkingDirectory();
+        } catch (Exception e){
+            DJILog.e(FTP_TAG, "Couldn't get current directory");
+        }
+        return directory;
     }
 }
