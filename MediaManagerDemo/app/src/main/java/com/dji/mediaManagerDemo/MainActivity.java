@@ -866,17 +866,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return result;
     }
 
-    // FTP Add Directory
-    public boolean ftpCreateDirectory(String directory) {
-        boolean result = false;
-        try {
-            result =  mFTPClient.makeDirectory(directory);
-        } catch (Exception e){
-            DJILog.e(FTP_TAG, "Couldn't make the directory");
-        }
-        return result;
-    }
-
     public boolean ftpChangeDirctory(String directory) {
         try{
             mFTPClient.changeWorkingDirectory(directory);
@@ -899,7 +888,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             fis.close();
         } catch(Exception e){
-            setResultToToast(e.toString());
             DJILog.e(FTP_TAG, "Couldn't upload the file");
         }
         return result;
