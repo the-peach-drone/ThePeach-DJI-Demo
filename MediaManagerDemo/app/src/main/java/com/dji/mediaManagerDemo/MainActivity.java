@@ -2,12 +2,16 @@ package com.dji.mediaManagerDemo;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +33,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +68,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ProgressDialog mLoadingDialog;
     private ProgressDialog mDownloadDialog;
     private SlidingDrawer mPushDrawerSd;
-    private File destDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString());
     private int currentProgress = -1;
     private ImageView mDisplayImageView;
     private int lastClickViewIndex =-1;
@@ -590,12 +595,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
             return;
         }
 
-        mediaFileList.get(index).fetchFileData(destDir, null, new DownloadListener<String>() {
+        // use internal avoid permission problem
+        File destDir_internal = new File(getFilesDir(), "Images_Copy");
+
+        mediaFileList.get(index).fetchFileData(destDir_internal, null, new DownloadListener<String>() {
             @Override
             public void onFailure(DJIError error) {
+                currentProgress = -1;
                 HideDownloadProgressDialog();
                 setResultToToast("Download File Failed" + error.getDescription());
-                currentProgress = -1;
             }
 
             @Override
@@ -603,7 +611,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             @Override
-            public void onRateUpdate(long total, long current, long persize) {
+            public void onRateUpdate(long total, long current, long perSize) {
                 int tmpProgress = (int) (1.0 * current / total * 100);
                 if (tmpProgress != currentProgress) {
                     mDownloadDialog.setProgress(tmpProgress);
@@ -624,9 +632,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onSuccess(String filePath) {
-                HideDownloadProgressDialog();
-                setResultToToast("Download File Success" + ":" + filePath);
                 currentProgress = -1;
+                HideDownloadProgressDialog();
+
+                // Copy internal file to external
+                String fileName_Image = destDir_internal.getPath() + "/" + mediaFileList.get(index).getFileName();
+                File image_File = new File(fileName_Image);
+                if(image_File.exists()) {
+                    // Copy file
+                    try {
+                        saveFileToExternal(image_File, getImageMimeType(fileName_Image), mediaFileList.get(index).getFileName());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Delete internal cache
+                    image_File.delete();
+                }
+
+                setResultToToast("Download File Success" + ":" + filePath);
             }
         });
     }
@@ -645,9 +669,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mediaFileList.get(index).fetchFileData(destDir_internal, null, new DownloadListener<String>() {
             @Override
             public void onFailure(DJIError error) {
+                currentProgress = -1;
                 HideDownloadProgressDialog();
                 setResultToToast("Download File Failed" + error.getDescription());
-                currentProgress = -1;
             }
 
             @Override
@@ -676,9 +700,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onSuccess(String filePath) {
-                HideDownloadProgressDialog();
-                //setResultToToast("Download File Success" + ":" + filePath);
                 currentProgress = -1;
+                HideDownloadProgressDialog();
 
                 // Get FTP ENV
                 SharedPreferences ftpEnv = getSharedPreferences("FTP_ENV", MODE_PRIVATE);
@@ -824,8 +847,97 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return false;
     }
 
+    private static byte[] convertFileToByteArray(File file) {
+        FileInputStream fis = null;
+
+        // Create byteArray of same length as file
+        byte[] byteArray = new byte[(int) file.length()];
+
+        try {
+            fis = new FileInputStream(file);
+
+            // Read file to byte array
+            fis.read(byteArray);
+            fis.close();
+        }catch (IOException ioExp) {
+            ioExp.printStackTrace();
+        }finally {
+            if(fis != null) {
+                try {
+                    fis.close();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return byteArray;
+    }
+
+    private String getImageMimeType(String imageUrl) {
+        String[] type_Arr = imageUrl.split("\\.");
+        if(type_Arr[(type_Arr.length) - 1].toLowerCase().equals("jpg")) {
+            return "image/jpeg";
+        }
+        else {
+            return "image/" + type_Arr[(type_Arr.length - 1)].toLowerCase();
+        }
+    }
+
+    public void saveFileToExternal(@NonNull final File file, @NonNull final String mimeType, @NonNull final String displayName) throws IOException {
+        final ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+        values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // protect file before update
+            values.put(MediaStore.Images.Media.IS_PENDING, 1);
+        }
+
+        final ContentResolver resolver = getContentResolver();
+        Uri uri = null;
+
+        try {
+            final Uri contentUri;
+            contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            uri = resolver.insert(contentUri, values);
+
+            if(uri == null) {
+                throw new IOException("Failed to create new MediaStore record.");
+            }
+            try (final OutputStream stream = resolver.openOutputStream(uri)) {
+                if(stream == null) {
+                    throw new IOException("Failed to open output stream.");
+                }
+                // Copy File(Byte Stream)
+                byte[] byteArray = convertFileToByteArray(file);
+                stream.write(byteArray);
+                stream.flush();
+                stream.close();
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    values.clear();
+
+                    // Pending set 0
+                    values.put(MediaStore.Images.Media.IS_PENDING, 0);
+                    // File update
+                    resolver.update(uri, values, null, null);
+                    setResultToToast("Image Saved.");
+                }
+            }
+        }
+        catch (IOException e) {
+            setResultToToast("Unable save image.");
+
+            if(uri != null) {
+                resolver.delete(uri, null, null);
+            }
+            throw e;
+        }
+    }
+
     // FTP Connect
-    public boolean ftpConnect(String host, String username, String password, int port) {
+    private boolean ftpConnect(String host, String username, String password, int port) {
         boolean result = false;
         try{
             mFTPClient.connect(host, port);
@@ -841,7 +953,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     // FTP Disconnect
-    public boolean ftpDisconnect() {
+    private boolean ftpDisconnect() {
         boolean result = false;
         try {
             mFTPClient.logout();
@@ -853,7 +965,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return result;
     }
 
-    public boolean ftpChangeDirctory(String directory) {
+    private boolean ftpChangeDirctory(String directory) {
         try{
             mFTPClient.changeWorkingDirectory(directory);
             return true;
@@ -864,7 +976,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     // FTP File Upload
-    public boolean ftpUploadFile(String srcFilePath, String desFileName, String desDirectory) {
+    private boolean ftpUploadFile(String srcFilePath, String desFileName, String desDirectory) {
         boolean result = false;
         try {
             FileInputStream fis = new FileInputStream(srcFilePath);
@@ -881,7 +993,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     // FTP Get current directory
-    public String ftpGetDirectory(){
+    private String ftpGetDirectory(){
         String directory = null;
         try{
             directory = mFTPClient.printWorkingDirectory();
