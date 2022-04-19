@@ -640,7 +640,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         // use internal avoid permission problem
-        File destDir_internal = new File(getFilesDir(), mediaFileList.get(index).getFileName());
+        File destDir_internal = new File(getFilesDir(), "Images");
 
         mediaFileList.get(index).fetchFileData(destDir_internal, null, new DownloadListener<String>() {
             @Override
@@ -677,7 +677,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             @Override
             public void onSuccess(String filePath) {
                 HideDownloadProgressDialog();
-                setResultToToast("Download File Success" + ":" + filePath);
+                //setResultToToast("Download File Success" + ":" + filePath);
                 currentProgress = -1;
 
                 // Get FTP ENV
@@ -692,13 +692,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     @Override
                     public void run() {
                         boolean ftp_Status = ftpConnect(settingIP, settingUser, settingPass, Integer.valueOf(settingPort));
-                        if(ftp_Status == true) {
+                        if(ftp_Status) {
                             String srcFilePath = destDir_internal.getPath() + "/" + mediaFileList.get(index).getFileName();
                             String desFileName = mediaFileList.get(index).getFileName();
                             String desDirectory = ftpGetDirectory();
 
                             boolean ftp_File = ftpUploadFile(srcFilePath, desFileName, desDirectory);
-                            if(ftp_File == true) {
+                            if(ftp_File) {
                                 setResultToToast("File upload.");
                             }
                             else {
@@ -710,7 +710,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             setResultToToast("Can't find host.");
                         }
                         // Delete internal file
-                        destDir_internal.delete();
+                        String fileName_Image = destDir_internal.getPath() + "/" + mediaFileList.get(index).getFileName();
+                        File image_File_Delete = new File(fileName_Image);
+                        if(image_File_Delete.exists()) {
+                            image_File_Delete.delete();
+                        }
                     }
                 });
                 ftp_Thread.start();
