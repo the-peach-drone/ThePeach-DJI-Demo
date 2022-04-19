@@ -82,16 +82,25 @@
     <LinearLayout
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <Button
             android:text="Set"
             android:textSize="15sp"
             android:padding="16dp"
             android:gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="53dp"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
             android:onClick="setting_btn_Clicked"
+            />
+        <Button
+            android:text="Cancel"
+            android:textSize="15sp"
+            android:padding="16dp"
+            android:gravity="center"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:onClick="cancel_btn_Clicked"
             />
     </LinearLayout>
 </LinearLayout>

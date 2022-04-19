@@ -9,11 +9,6 @@ import android.view.Window;
 import android.widget.EditText;
 
 public class popup_Settings extends Activity{
-    String ip;
-    String port;
-    String user;
-    String pass;
-
     EditText editTextIp;
     EditText editTextPort;
     EditText editTextUser;
@@ -39,11 +34,6 @@ public class popup_Settings extends Activity{
     }
 
     public void setting_btn_Clicked(View v) {
-        ip = editTextIp.getText().toString();
-        port = editTextPort.getText().toString();
-        user = editTextUser.getText().toString();
-        pass = editTextPass.getText().toString();
-
         // FTP Env
         SharedPreferences ftpEnv = getSharedPreferences("FTP_ENV", MODE_PRIVATE);
 
@@ -51,14 +41,18 @@ public class popup_Settings extends Activity{
         SharedPreferences.Editor ftpEnv_Editor = ftpEnv.edit();
 
         // Set Env
-        ftpEnv_Editor.putString("ftpHost", ip);
-        ftpEnv_Editor.putString("ftpPort", port);
-        ftpEnv_Editor.putString("ftpUser", user);
-        ftpEnv_Editor.putString("ftpPass", pass);
+        ftpEnv_Editor.putString("ftpHost", editTextIp.getText().toString());
+        ftpEnv_Editor.putString("ftpPort", editTextPort.getText().toString());
+        ftpEnv_Editor.putString("ftpUser", editTextUser.getText().toString());
+        ftpEnv_Editor.putString("ftpPass", editTextPass.getText().toString());
 
         // Env commit
         ftpEnv_Editor.commit();
 
+        finish();
+    }
+
+    public void cancel_btn_Clicked(View v) {
         finish();
     }
 
