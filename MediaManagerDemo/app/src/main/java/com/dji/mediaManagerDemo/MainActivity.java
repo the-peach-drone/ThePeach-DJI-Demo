@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
-    private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mUploadBtn, mSettingBtn;
+    private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mUploadBtn, mSettingBtn, mAllUploadBtn;
     private RecyclerView listView;
     private FileListAdapter mListAdapter;
     private List<MediaFile> mediaFileList = new ArrayList<MediaFile>();
@@ -83,6 +83,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mFTPClient = new FTPClient();
         initUI();
         DemoApplication.getAircraftInstance().getCamera().setStorageStateCallBack(new StorageState.Callback() {
             @Override
@@ -104,9 +105,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             }
         });
-
-        // FTP init
-        mFTPClient = new FTPClient();
     }
 
     @Override
@@ -204,6 +202,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mDownloadBtn = (Button) findViewById(R.id.download_btn);
         mUploadBtn = (Button) findViewById(R.id.upload_btn);
         mSettingBtn = (Button) findViewById(R.id.setting_btn);
+        mAllUploadBtn = (Button) findViewById(R.id.all_upload_btn);
         mReloadBtn = (Button) findViewById(R.id.reload_btn);
         mDisplayImageView = (ImageView) findViewById(R.id.imageView);
         mDisplayImageView.setVisibility(View.VISIBLE);
@@ -215,6 +214,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mUploadBtn.setOnClickListener(this);
         mReloadBtn.setOnClickListener(this);
         mDownloadBtn.setOnClickListener(this);
+        mAllUploadBtn.setOnClickListener(this);
     }
 
     private void showProgressDialog() {
@@ -732,6 +732,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         else {
                             setResultToToast("Can't find host.");
                         }
+
                         // Delete internal file
                         String fileName_Image = destDir_internal.getPath() + "/" + mediaFileList.get(index).getFileName();
                         File image_File_Delete = new File(fileName_Image);
@@ -743,6 +744,60 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 ftp_Thread.start();
             }
         });
+    }
+
+    private void uploadAllToFTP(final int list_Count) {
+        setResultToToast("Start all image file upload.");
+
+        // use internal avoid permission problem
+        File destDir_internal = new File(getFilesDir(), "ImagesAll");
+
+        for(int i = 0; i < list_Count; i++) {
+            if ((mediaFileList.get(i).getMediaType() == MediaFile.MediaType.PANORAMA)
+                    || (mediaFileList.get(i).getMediaType() == MediaFile.MediaType.SHALLOW_FOCUS)) {
+                continue;
+            }
+
+            mediaFileList.get(i).fetchFileData(destDir_internal, null, new DownloadListener<String>() {
+                @Override
+                public void onFailure(DJIError error) {
+                    currentProgress = -1;
+                    HideDownloadProgressDialog();
+                    setResultToToast("Download File Failed" + error.getDescription());
+                }
+
+                @Override
+                public void onProgress(long total, long current) {
+                }
+
+                @Override
+                public void onRateUpdate(long total, long current, long persize) {
+                    int tmpProgress = (int) (1.0 * current / total * 100);
+                    if (tmpProgress != currentProgress) {
+                        mDownloadDialog.setProgress(tmpProgress);
+                        currentProgress = tmpProgress;
+                    }
+                }
+
+                @Override
+                public void onRealtimeDataUpdate(byte[] bytes, long l, boolean b) {
+
+                }
+
+                @Override
+                public void onStart() {
+                    currentProgress = -1;
+                    ShowDownloadProgressDialog();
+                }
+
+                @Override
+                public void onSuccess(String filePath) {
+                    currentProgress = -1;
+                    HideDownloadProgressDialog();
+                }
+            });
+            // TODO : Add multiple file transfer code
+        }
     }
 
     private void deleteFileByIndex(final int index) {
@@ -811,6 +866,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 else {
                     uploadFileToFTP(lastClickViewIndex);
                 }
+                break;
+            }
+            case R.id.all_upload_btn: {
+                uploadAllToFTP(mediaFileList.size());
                 break;
             }
             case R.id.setting_btn: {
@@ -885,7 +944,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    public void saveFileToExternal(@NonNull final File file, @NonNull final String mimeType, @NonNull final String displayName) throws IOException {
+    private void saveFileToExternal(@NonNull final File file, @NonNull final String mimeType, @NonNull final String displayName) throws IOException {
         final ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);

@@ -13,7 +13,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:text="Back"
-        android:textSize="11sp" />
+        android:textSize="10dp" />
 
     <Button
         android:id="@+id/delete_btn"
@@ -22,7 +22,7 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/back_btn"
         android:text="Delete"
-        android:textSize="11sp" />
+        android:textSize="10dp" />
 
     <Button
         android:id="@+id/reload_btn"
@@ -31,7 +31,7 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/delete_btn"
         android:text="Reload"
-        android:textSize="11sp" />
+        android:textSize="10dp" />
 
     <Button
         android:id="@+id/download_btn"
@@ -40,7 +40,7 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/reload_btn"
         android:text="Download"
-        android:textSize="11sp" />
+        android:textSize="10dp" />
 
     <Button
         android:id="@+id/upload_btn"
@@ -49,17 +49,25 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/download_btn"
         android:text="Upload"
-        android:textSize="11sp" />
+        android:textSize="10dp" />
 
     <Button
-        android:id="@+id/setting_btn"
-        android:layout_width="75dp"
+        android:id="@+id/all_upload_btn"
+        android:layout_width="110dp"
         android:layout_height="40dp"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/upload_btn"
-        android:text="Setting"
-        android:textSize="11sp" />
+        android:text="Upload(All File)"
+        android:textSize="10dp" />
 
+    <Button
+        android:id="@+id/setting_btn"
+        android:layout_width="65dp"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/all_upload_btn"
+        android:text="Setting"
+        android:textSize="10dp" />
 
     <ImageView
         android:id="@+id/imageView"
